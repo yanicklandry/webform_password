@@ -1,13 +1,12 @@
 <?php
-// $Id: password.inc,v 1.21.2.9 2010/12/29 03:56:35 quicksketch Exp $
 
 /**
  * @file
- * Webform module password component.
+ * Webform module textfield component.
  */
 
 /**
- * Implementation of _webform_defaults_component().
+ * Implements _webform_defaults_component().
  */
 function _webform_defaults_password() {
   return array(
@@ -20,8 +19,6 @@ function _webform_defaults_password() {
     'extra' => array(
       'width' => '',
       'maxlength' => '',
-      'field_prefix' => '',
-      'field_suffix' => '',
       'disabled' => 0,
       'unique' => 0,
       'title_display' => 0,
@@ -32,59 +29,39 @@ function _webform_defaults_password() {
 }
 
 /**
- * Implementation of _webform_theme_component().
+ * Implements _webform_theme_component().
  */
 function _webform_theme_password() {
   return array(
     'webform_display_password' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
   );
 }
 
 /**
- * Implementation of _webform_edit_component().
+ * Implements _webform_edit_component().
  */
 function _webform_edit_password($component) {
   $form = array();
   $form['value'] = array(
-    '#type' => 'password',
+    '#type' => 'textfield',
     '#title' => t('Default value'),
     '#default_value' => $component['value'],
     '#description' => t('The default value of the field.') . theme('webform_token_help'),
     '#size' => 60,
-    '#maxlength' => 127,
+    '#maxlength' => 1024,
     '#weight' => 0,
   );
   $form['display']['width'] = array(
-    '#type' => 'password',
+    '#type' => 'textfield',
     '#title' => t('Width'),
     '#default_value' => $component['extra']['width'],
-    '#description' => t('Width of the password.') . ' ' . t('Leaving blank will use the default size.'),
+    '#description' => t('Width of the textfield.') . ' ' . t('Leaving blank will use the default size.'),
     '#size' => 5,
     '#maxlength' => 10,
     '#weight' => 0,
     '#parents' => array('extra', 'width'),
-  );
-  $form['display']['field_prefix'] = array(
-    '#type' => 'password',
-    '#title' => t('Label placed to the left of the password'),
-    '#default_value' => $component['extra']['field_prefix'],
-    '#description' => t('Examples: $, #, -.'),
-    '#size' => 20,
-    '#maxlength' => 127,
-    '#weight' => 1.1,
-    '#parents' => array('extra', 'field_prefix'),
-  );
-  $form['display']['field_suffix'] = array(
-    '#type' => 'password',
-    '#title' => t('Label placed to the right of the password'),
-    '#default_value' => $component['extra']['field_suffix'],
-    '#description' => t('Examples: lb, kg, %.'),
-    '#size' => 20,
-    '#maxlength' => 127,
-    '#weight' => 1.2,
-    '#parents' => array('extra', 'field_suffix'),
   );
   $form['display']['disabled'] = array(
     '#type' => 'checkbox',
@@ -105,10 +82,10 @@ function _webform_edit_password($component) {
     '#parents' => array('extra', 'unique'),
   );
   $form['validation']['maxlength'] = array(
-    '#type' => 'password',
+    '#type' => 'textfield',
     '#title' => t('Maxlength'),
     '#default_value' => $component['extra']['maxlength'],
-    '#description' => t('Maximum length of the password value.'),
+    '#description' => t('Maximum length of the textfield value.'),
     '#size' => 5,
     '#maxlength' => 10,
     '#weight' => 2,
@@ -118,23 +95,19 @@ function _webform_edit_password($component) {
 }
 
 /**
- * Implementation of _webform_render_component().
+ * Implements _webform_render_component().
  */
 function _webform_render_password($component, $value = NULL, $filter = TRUE) {
   $element = array(
-    '#type' => $component['type'],
+    '#type' => 'password',
     '#title' => $filter ? _webform_filter_xss($component['name']) : $component['name'],
     '#title_display' => $component['extra']['title_display'] ? $component['extra']['title_display'] : 'before',
     '#default_value' => $filter ? _webform_filter_values($component['value'], NULL, NULL, NULL, FALSE) : $component['value'],
     '#required' => $component['mandatory'],
     '#weight' => $component['weight'],
-    '#field_prefix' => empty($component['extra']['field_prefix']) ? NULL : ($filter ? _webform_filter_xss($component['extra']['field_prefix']) : $component['extra']['field_prefix']),
-    '#field_suffix' => empty($component['extra']['field_suffix']) ? NULL : ($filter ? _webform_filter_xss($component['extra']['field_suffix']) : $component['extra']['field_suffix']),
     '#description' => $filter ? _webform_filter_descriptions($component['extra']['description']) : $component['extra']['description'],
     '#attributes' => $component['extra']['attributes'],
-    '#theme_wrappers' => array('webform_element_wrapper'),
-    '#pre_render' => array('webform_element_title_display'),
-    '#post_render' => array('webform_element_wrapper'),
+    '#theme_wrappers' => array('webform_element'),
     '#webform_component' => $component,
   );
 
@@ -163,17 +136,14 @@ function _webform_render_password($component, $value = NULL, $filter = TRUE) {
 }
 
 /**
- * Implementation of _webform_display_component().
+ * Implements _webform_display_component().
  */
 function _webform_display_password($component, $value, $format = 'html') {
   return array(
     '#title' => $component['name'],
     '#weight' => $component['weight'],
     '#theme' => 'webform_display_password',
-    '#theme_wrappers' => $format == 'html' ? array('webform_element', 'webform_element_wrapper') : array('webform_element_text'),
-    '#post_render' => array('webform_element_wrapper'),
-    '#field_prefix' => $component['extra']['field_prefix'],
-    '#field_suffix' => $component['extra']['field_suffix'],
+    '#theme_wrappers' => $format == 'html' ? array('webform_element') : array('webform_element_text'),
     '#format' => $format,
     '#value' => isset($value[0]) ? $value[0] : '',
     '#webform_component' => $component,
@@ -183,29 +153,31 @@ function _webform_display_password($component, $value, $format = 'html') {
 /**
  * Format the output of data for this component.
  */
-function theme_webform_display_password($element) {
-  $prefix = $element['#format'] == 'html' ? filter_xss($element['#field_prefix']) : $element['#field_prefix'];
-  $suffix = $element['#format'] == 'html' ? filter_xss($element['#field_suffix']) : $element['#field_suffix'];
-  $value = $element['#format'] == 'html' ? check_plain($element['#value']) : $element['#value'];
-  return $value !== '' ? ($prefix . $value . $suffix) : ' ';
+function theme_webform_display_password($variables) {
+  $element = $variables['element'];
+  $element['#value'] = empty($element['#value']) ? ' ' : $element['#value'];
+  return $element['#format'] == 'html' ? check_plain($element['#value']) : $element['#value'];
 }
 
 /**
- * Implementation of _webform_analysis_component().
+ * Implements _webform_analysis_component().
  */
 function _webform_analysis_password($component, $sids = array()) {
-  $placeholders = count($sids) ? array_fill(0, count($sids), "'%s'") : array();
-  $sidfilter = count($sids) ? " AND sid in (" . implode(",", $placeholders) . ")" : "";
-  $query = 'SELECT data ' .
-    ' FROM {webform_submitted_data} ' .
-    ' WHERE nid = %d ' .
-    ' AND cid = %d ' . $sidfilter;
+  $query = db_select('webform_submitted_data', 'wsd', array('fetch' => PDO::FETCH_ASSOC))
+    ->fields('wsd', array('data'))
+    ->condition('nid', $component['nid'])
+    ->condition('cid', $component['cid']);
+
+  if (count($sids)) {
+    $query->condition('sid', $sids, 'IN');
+  }
+
   $nonblanks = 0;
   $submissions = 0;
   $wordcount = 0;
 
-  $result = db_query($query, array_merge(array($component['nid'], $component['cid']), $sids));
-  while ($data = db_fetch_array($result)) {
+  $result = $query->execute();
+  foreach ($result as $data) {
     if (drupal_strlen(trim($data['data'])) > 0) {
       $nonblanks++;
       $wordcount += str_word_count(trim($data['data']));
@@ -220,14 +192,14 @@ function _webform_analysis_password($component, $sids = array()) {
 }
 
 /**
- * Implementation of _webform_table_component().
+ * Implements _webform_table_component().
  */
 function _webform_table_password($component, $value) {
   return check_plain(empty($value[0]) ? '' : $value[0]);
 }
 
 /**
- * Implementation of _webform_csv_headers_component().
+ * Implements _webform_csv_headers_component().
  */
 function _webform_csv_headers_password($component, $export_options) {
   $header = array();
@@ -238,7 +210,7 @@ function _webform_csv_headers_password($component, $export_options) {
 }
 
 /**
- * Implementation of _webform_csv_data_component().
+ * Implements _webform_csv_data_component().
  */
 function _webform_csv_data_password($component, $export_options, $value) {
   return !isset($value[0]) ? '' : $value[0];
